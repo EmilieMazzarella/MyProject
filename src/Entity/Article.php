@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ArticleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -25,6 +27,21 @@ class Article
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $texte = null;
+
+    /**
+     * @var Collection<int, Remarque>
+     */
+    #[ORM\OneToMany(targetEntity: Remarque::class, mappedBy: 'article')]
+    private Collection $remarques;
+
+    #[ORM\ManyToOne(inversedBy: 'articles')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Sujet $sujet = null;
+
+    public function __construct()
+    {
+        $this->remarques = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -75,6 +92,48 @@ class Article
     public function setTexte(string $texte): static
     {
         $this->texte = $texte;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Remarque>
+     */
+    public function getRemarques(): Collection
+    {
+        return $this->remarques;
+    }
+
+    public function addRemarque(Remarque $remarque): static
+    {
+        if (!$this->remarques->contains($remarque)) {
+            $this->remarques->add($remarque);
+            $remarque->setArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRemarque(Remarque $remarque): static
+    {
+        if ($this->remarques->removeElement($remarque)) {
+            // set the owning side to null (unless already changed)
+            if ($remarque->getArticle() === $this) {
+                $remarque->setArticle(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getSujet(): ?Sujet
+    {
+        return $this->sujet;
+    }
+
+    public function setSujet(?Sujet $sujet): static
+    {
+        $this->sujet = $sujet;
 
         return $this;
     }
