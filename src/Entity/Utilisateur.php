@@ -53,11 +53,19 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinTable(name: 'utilisateur_post_redige')]
     private Collection $redacteurs;
 
+    /**
+     * @var Collection<int, Post>
+     */
+    #[ORM\ManyToMany(targetEntity: Post::class, inversedBy: 'postsEnregistres')]
+    #[ORM\JoinTable(name: 'utilisateur_post_enregistre')]
+    private Collection $enregistreurs;
+
     public function __construct()
     {
         $this->invalidateurs = new ArrayCollection();
         $this->validateurs = new ArrayCollection();
         $this->redacteurs = new ArrayCollection();
+        $this->enregistreurs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -209,6 +217,30 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeRedacteur(Post $redacteur): static
     {
         $this->redacteurs->removeElement($redacteur);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public function getEnregistreurs(): Collection
+    {
+        return $this->enregistreurs;
+    }
+
+    public function addEnregistreur(Post $enregistreur): static
+    {
+        if (!$this->enregistreurs->contains($enregistreur)) {
+            $this->enregistreurs->add($enregistreur);
+        }
+
+        return $this;
+    }
+
+    public function removeEnregistreur(Post $enregistreur): static
+    {
+        $this->enregistreurs->removeElement($enregistreur);
 
         return $this;
     }

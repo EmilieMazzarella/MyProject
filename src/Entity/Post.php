@@ -55,12 +55,19 @@ class Post
     #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'redacteurs')]
     private Collection $postsRediges;
 
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'enregistreurs')]
+    private Collection $postsEnregistres;
+
     public function __construct()
     {
         $this->commentaires = new ArrayCollection();
         $this->postsInvalides = new ArrayCollection();
         $this->postsValides = new ArrayCollection();
         $this->postsRediges = new ArrayCollection();
+        $this->postsEnregistres = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -222,6 +229,33 @@ class Post
     {
         if ($this->postsRediges->removeElement($postsRedige)) {
             $postsRedige->removeRedacteur($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getPostsEnregistres(): Collection
+    {
+        return $this->postsEnregistres;
+    }
+
+    public function addPostsEnregistre(Utilisateur $postsEnregistre): static
+    {
+        if (!$this->postsEnregistres->contains($postsEnregistre)) {
+            $this->postsEnregistres->add($postsEnregistre);
+            $postsEnregistre->addEnregistreur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePostsEnregistre(Utilisateur $postsEnregistre): static
+    {
+        if ($this->postsEnregistres->removeElement($postsEnregistre)) {
+            $postsEnregistre->removeEnregistreur($this);
         }
 
         return $this;
