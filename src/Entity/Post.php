@@ -49,11 +49,18 @@ class Post
     #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'validateurs')]
     private Collection $postsValides;
 
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'redacteurs')]
+    private Collection $postsRediges;
+
     public function __construct()
     {
         $this->commentaires = new ArrayCollection();
         $this->postsInvalides = new ArrayCollection();
         $this->postsValides = new ArrayCollection();
+        $this->postsRediges = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -188,6 +195,33 @@ class Post
     {
         if ($this->postsValides->removeElement($postsValide)) {
             $postsValide->removeValidateur($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getPostsRediges(): Collection
+    {
+        return $this->postsRediges;
+    }
+
+    public function addPostsRedige(Utilisateur $postsRedige): static
+    {
+        if (!$this->postsRediges->contains($postsRedige)) {
+            $this->postsRediges->add($postsRedige);
+            $postsRedige->addRedacteur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePostsRedige(Utilisateur $postsRedige): static
+    {
+        if ($this->postsRediges->removeElement($postsRedige)) {
+            $postsRedige->removeRedacteur($this);
         }
 
         return $this;

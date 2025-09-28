@@ -43,12 +43,21 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Post>
      */
     #[ORM\ManyToMany(targetEntity: Post::class, inversedBy: 'postsValides')]
+    #[ORM\JoinTable(name: 'utilisateur_post_valide')]
     private Collection $validateurs;
+
+    /**
+     * @var Collection<int, Post>
+     */
+    #[ORM\ManyToMany(targetEntity: Post::class, inversedBy: 'postsRediges')]
+    #[ORM\JoinTable(name: 'utilisateur_post_redige')]
+    private Collection $redacteurs;
 
     public function __construct()
     {
         $this->invalidateurs = new ArrayCollection();
         $this->validateurs = new ArrayCollection();
+        $this->redacteurs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -176,6 +185,30 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeValidateur(Post $validateur): static
     {
         $this->validateurs->removeElement($validateur);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public function getRedacteurs(): Collection
+    {
+        return $this->redacteurs;
+    }
+
+    public function addRedacteur(Post $redacteur): static
+    {
+        if (!$this->redacteurs->contains($redacteur)) {
+            $this->redacteurs->add($redacteur);
+        }
+
+        return $this;
+    }
+
+    public function removeRedacteur(Post $redacteur): static
+    {
+        $this->redacteurs->removeElement($redacteur);
 
         return $this;
     }
