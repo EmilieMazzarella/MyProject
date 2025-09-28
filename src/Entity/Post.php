@@ -37,9 +37,23 @@ class Post
     #[ORM\JoinColumn(nullable: false)]
     private ?Sujet $sujet = null;
 
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'invalidateurs')]
+    private Collection $postsInvalides;
+
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'validateurs')]
+    private Collection $postsValides;
+
     public function __construct()
     {
         $this->commentaires = new ArrayCollection();
+        $this->postsInvalides = new ArrayCollection();
+        $this->postsValides = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -121,6 +135,60 @@ class Post
     public function setSujet(?Sujet $sujet): static
     {
         $this->sujet = $sujet;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getPostsInvalides(): Collection
+    {
+        return $this->postsInvalides;
+    }
+
+    public function addPostsInvalide(Utilisateur $postsInvalide): static
+    {
+        if (!$this->postsInvalides->contains($postsInvalide)) {
+            $this->postsInvalides->add($postsInvalide);
+            $postsInvalide->addInvalidateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePostsInvalide(Utilisateur $postsInvalide): static
+    {
+        if ($this->postsInvalides->removeElement($postsInvalide)) {
+            $postsInvalide->removeInvalidateur($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getPostsValides(): Collection
+    {
+        return $this->postsValides;
+    }
+
+    public function addPostsValide(Utilisateur $postsValide): static
+    {
+        if (!$this->postsValides->contains($postsValide)) {
+            $this->postsValides->add($postsValide);
+            $postsValide->addValidateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removePostsValide(Utilisateur $postsValide): static
+    {
+        if ($this->postsValides->removeElement($postsValide)) {
+            $postsValide->removeValidateur($this);
+        }
 
         return $this;
     }

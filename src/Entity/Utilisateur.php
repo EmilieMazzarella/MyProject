@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -30,6 +32,24 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    /**
+     * @var Collection<int, Post>
+     */
+    #[ORM\ManyToMany(targetEntity: Post::class, inversedBy: 'postsInvalides')]
+    #[ORM\JoinTable(name: 'utilisateur_post_invalide')]
+    private Collection $invalidateurs;
+    /**
+     * @var Collection<int, Post>
+     */
+    #[ORM\ManyToMany(targetEntity: Post::class, inversedBy: 'postsValides')]
+    private Collection $validateurs;
+
+    public function __construct()
+    {
+        $this->invalidateurs = new ArrayCollection();
+        $this->validateurs = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -110,5 +130,53 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         // @deprecated, to be removed when upgrading to Symfony 8
+    }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public function getInvalidateurs(): Collection
+    {
+        return $this->invalidateurs;
+    }
+
+    public function addInvalidateur(Post $invalidateur): static
+    {
+        if (!$this->invalidateurs->contains($invalidateur)) {
+            $this->invalidateurs->add($invalidateur);
+        }
+
+        return $this;
+    }
+
+    public function removeInvalidateur(Post $invalidateur): static
+    {
+        $this->invalidateurs->removeElement($invalidateur);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public function getValidateurs(): Collection
+    {
+        return $this->validateurs;
+    }
+
+    public function addValidateur(Post $validateur): static
+    {
+        if (!$this->validateurs->contains($validateur)) {
+            $this->validateurs->add($validateur);
+        }
+
+        return $this;
+    }
+
+    public function removeValidateur(Post $validateur): static
+    {
+        $this->validateurs->removeElement($validateur);
+
+        return $this;
     }
 }
